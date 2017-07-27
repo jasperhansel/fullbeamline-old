@@ -12,5 +12,6 @@ setup(
     author_email = 'jasperhansel@gmail.com',
     packages=['fullbeamline'],
     scripts=['scripts/fullbeamline'],
-    package_data={'fullbeamline': ['fortran/*.f90']}
+    package_data={'fullbeamline': ['fortran/*.f90']},
+    install_requires=['numpy', 'matplotlib', 'requests']
 )

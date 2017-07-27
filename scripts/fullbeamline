@@ -24,13 +24,10 @@ fullbeamline --check
 """
 
 
-error = lambda message: print('\033[1mfullbeamline:\033[0m \033[31merror:\033[0m', message)
-
-
 def main():
     if (len(sys.argv) < 2):
-        error('no command specified')
-        return
+        print('\033[1mfullbeamline: \033[31merror: \033[0mno command specified')
+        sys.exit(1)
     command = sys.argv[1]
     if command == '--help':
         print(help_message)
@@ -48,9 +45,11 @@ def main():
         elif len(sys.argv) > 2 and sys.argv[2] == 'production':
             fullbeamline.build('production')
         else:
-            error('must specify \'debug\' or \'production\' after --build')
+            print('\033[1mfullbeamline: \033[31merror: \033[0mmust specify \'de'
+                  'bug\' or \'production\' after --build')
     else:
-        error('command "{}" not recognized'.format(command))
+        print('\033[1mfullbeamline: \033[31merror: \033[0mcommand \'{}\' not re'
+              'cognized'.format(command))
 
 
 if __name__ == '__main__':
