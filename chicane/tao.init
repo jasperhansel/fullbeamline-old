@@ -1,0 +1,159 @@
+&tao_design_lattice
+  design_lattice(1) = "lattice.bmad"
+/
+
+
+&tao_params
+  global%track_type = "beam"
+/
+
+
+&tao_beam_init
+ beam_init%a_emit = 0.001
+ beam_init%b_emit = 0.001
+ beam_init%n_bunch = 1
+ beam_init%n_particle = 10
+ beam_init%bunch_charge = -1.6e-16
+/
+
+
+&tao_d2_data
+  d2_data%name = "sigma"
+  n_d1_data = 3
+/
+
+
+&tao_d1_data
+  ix_d1_data = 1
+  search_for_lat_eles = "*"
+  d1_data%name = "x"
+  default_data_type = "sigma.x"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 2
+  use_same_lat_eles_as = "sigma.x"
+  d1_data%name = "y"
+  default_data_type = "sigma.y"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 3
+  use_same_lat_eles_as = "sigma.x"
+  d1_data%name = "z"
+  default_data_type = "sigma.z"
+  default_data_source = "beam"
+/
+
+
+&tao_d2_data
+  d2_data%name = "twiss"
+  n_d1_data = 4
+/
+
+
+&tao_d1_data
+  ix_d1_data = 1
+  search_for_lat_eles = "*"
+  d1_data%name = "aa"
+  default_data_type = "alpha.a"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 2
+  use_same_lat_eles_as = "twiss.aa"
+  d1_data%name = "ab"
+  default_data_type = "alpha.b"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 3
+  use_same_lat_eles_as = "twiss.aa"
+  d1_data%name = "ba"
+  default_data_type = "beta.a"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 4
+  use_same_lat_eles_as = "twiss.aa"
+  d1_data%name = "bb"
+  default_data_type = "beta.b"
+  default_data_source = "beam"
+/
+
+
+&tao_plot_page
+  plot_page%plot_display_type = 'X'
+  plot_page%size = 1000, 750
+  plot_page%border = 50, 50, 50, 50, 'POINTS'
+  plot_page%text_height = 12
+  region(1) = "rA" 0.0, 1.0, 0.0, 0.5
+  region(2) = "rB" 0.0, 1.0, 0.5, 1.0
+  place(1) = "rA", "pspace"
+  place(2) = "rB", "blah"
+/
+
+
+&tao_template_plot
+  plot%name = "pspace"
+  plot%x%min = -2e-4
+  plot%x%max = 2e-4
+  plot%x%major_div_nominal = 4
+  plot%x%label = "z"
+  plot%n_graph = 1
+/
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "z"
+  graph%type = "phase_space"
+  graph%box = 1, 1, 1, 1
+  graph%margin = 0.12, 0.12, 0.12, 0.12, "%BOX"
+  graph%y%label = "Pz"
+  graph%y%max = 0.003
+  graph%y%min = -0.003
+  graph%y%major_div_nominal = 4
+  graph%n_curve = 1
+  curve(1)%data_type_x = "z"
+  curve(1)%data_type = "pz"
+  curve(1)%data_source = "beam"
+  curve(1)%ele_ref_name = "gpt"
+/
+
+
+&tao_template_plot
+  plot%name = "blah"
+  plot%x%min = 0
+  plot%x%max = 1
+  plot%x%major_div_nominal = 10
+  plot%x%label = "s"
+  plot%x_axis_type = "s"
+  plot%n_graph = 1
+/
+
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "chirp"
+  !graph%type = "data"
+  graph%box = 1, 1, 1, 1
+  graph%title = "chirp"
+  graph%margin = 60, 200, 30, 30, "POINTS"
+  graph%y%label = "dPz/dz"
+  graph%y%min = -30
+  graph%y%max = 30
+  graph%n_curve = 1
+  curve(1)%name = "chirp"
+  curve(1)%data_source = "beam"
+  curve(1)%data_type = "dpz_dz"
+/

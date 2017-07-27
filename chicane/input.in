@@ -1,0 +1,217 @@
+freq = 2.856e9; # RF frequency
+G01=6.1;
+G02=54;
+L2Phase = L2PHASE; # Linac Phase in [deg].
+#nps = 1001;#50000 ;   # Number of macro particles
+N=100;
+
+Qtot = -20e-12 ; # Total charge
+
+#slit parameters
+depth = 1.436e-2 * (3/42)^2 ;
+phi = 3.8e-6 / (3*0.002) ;
+d = 0.025e-2; #slit separation
+w = d/10.0;#2*4*depth * phi; #slit width
+slitLoc = 1.375;
+Nslits = 10;
+height = Nslits*d;
+
+
+
+
+radius = 0.56e-3; # Beam radius
+trms =1.02e-12 ;   # Laser pulse length
+
+Eo = 0.4 ;           # Start with 0.4 eV
+G = 1-q*Eo/(m*c*c) ; # Corresponding Gamma
+GB = sqrt(G^2-1) ;   # Corresponding Gamma*Beta
+
+ # Strength parameter of the solenoid
+if(!defined(poi1)) poi1=0.60*1.17;
+
+#end screen location
+if(!defined(scrLoc)) scrLoc=5.99;
+
+SWEmax = 50;   # Maximum E field on z axis in this gpt simulation for the full cell in [MV/m].
+TWACC = 12.2;   # Accelerating gradient in this gpt simulation for the traveling wave cells in [MV/m].
+
+SW1MapEmax = 1.485379;  # Maximum E field on z axis in the field map for the first half cell.
+SW2MapEmax = 2.179953;  # Maximum E field on z axis in the field map for the full cell.
+SW2CMapEmax = 4.117980; # Maximum E field on z axis in the field map for the input coupling cell.
+TWMapEmax = 1.354103;   # Maximum E field on z axis in the field map for the traveling wave cell.
+OCMapEmax = 3.21166619; # Maximum E field on z axis in the field map for the output coupling cell.
+
+TWMapL = 1.7495e-2; # Length of the half of the traveling wave cell.
+
+TW0z=10.7592e-2;    # z position starting with the traveling wave cells.
+TW1z=TW0z+2*TWMapL; # z position of the center of the traveling wave cells.
+TW2z=TW1z+2*TWMapL;
+TW3z=TW2z+2*TWMapL;
+TW4z=TW3z+2*TWMapL;
+TW5z=TW4z+2*TWMapL;
+TW6z=TW5z+2*TWMapL;
+TW7z=TW6z+2*TWMapL;
+
+deg2rad = pi/180;
+phiSW0 = 39.5*deg2rad;                     # Beam launch phase, sin(wt+phiSW0).
+phiSW = phiSW0 + (-90 + 180) * deg2rad;  # Adjst the map phase. -90:cos->sin, 180:+->-
+
+TWPhaseOffset = 0 * deg2rad; # Deviation from the normal phase. This can be achieved by changing the cavity temperature.
+
+TW0Phase=phiSW+1.5*pi + TWPhaseOffset;    # phase advance of the traveling wave cells.
+TW1Phase=TW0Phase-2/3*pi;
+TW2Phase=TW1Phase-2/3*pi;
+TW3Phase=TW2Phase-2/3*pi;
+TW4Phase=TW3Phase-2/3*pi;
+TW5Phase=TW4Phase-2/3*pi;
+TW6Phase=TW5Phase-2/3*pi;
+TW7Phase=TW6Phase-2/3*pi;
+
+
+# Setup initial beam
+setparticles("beam",N,me,qe,QTOT) ;
+setrxydist("beam","u",radius/2, radius) ;
+setphidist("beam","u",0,2*pi) ;
+
+setGBzdist( "beam", "u", GB, 0 ) ;
+setGBthetadist( "beam", "u", pi/4, pi/2 ) ;
+setGBphidist( "beam", "u", 0, 2*pi ) ;
+
+settdist("beam", "g", 0, trms,2,2) ;
+#snapshot(-tlen/2, 1.5*tlen, tlen/10) ;
+
+# Setup Space Charge Caluculation
+# setcharge2Dcircle("beam",QTOT) ;
+# spacecharge2Dcircle() ;
+spacecharge3Dmesh("Cathode");
+
+# Setup Solenoid
+map2D_B("wcs","z",0.0,"GPTData/SOLENO1.gdf", "R","Z", "Br","Bz", poi1 ) ;
+#map2D_B("wcs","z",1.25,"SOLENO1.gdf", "R","Z", "Br","Bz", poi2 ) ;
+
+# Multislit for Emittance measurements
+#multislit("wcs","z",slitLoc,w,height,depth,d,Nslits);
+
+# Setup RF Field
+map25D_TM("wcs","z",0.0,"GPTData/HALF-055.gdf","R","Z","Er","Ez","H", SWEmax/SW1MapEmax,0, phiSW,2*pi*freq) ;
+map25D_TM("wcs","z",2.8866e-2,"GPTData/FULL-100.gdf","R","Z","Er","Ez","H", SWEmax/SW2MapEmax,0, phiSW+pi,2*pi*freq) ;
+map25D_TM("wcs","z",2.8866e-2,"GPTData/FULL-100-C.gdf","R","Z","Er","Ez","H", TWACC*TWMapEmax/SW2CMapEmax,0, TW0Phase,2*pi*freq) ;
+map25D_TM("wcs","z",10.7592e-2,"GPTData/TW-COS.gdf","R","Z","Er","Ez","H", TWACC,0, TW0Phase,2*pi*freq) ;
+map25D_TM("wcs","z",10.7592e-2,"GPTData/TW-SIN.gdf","R","Z","Er","Ez","H", TWACC,0, TW0Phase-0.5*pi,2*pi*freq) ;
+#TW1
+map25D_TM("wcs","z",TW1z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW1Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW1z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW1Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW1z,"GPTData/TW-COS.gdf", "R","Z","Er","Ez","H", TWACC,0, TW1Phase,       2*pi*freq) ;
+map25D_TM("wcs","z",TW1z,"GPTData/TW-SIN.gdf", "R","Z","Er","Ez","H", TWACC,0, TW1Phase-0.5*pi,2*pi*freq) ;
+#TW2
+map25D_TM("wcs","z",TW2z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW2Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW2z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW2Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW2z,"GPTData/TW-COS.gdf", "R","Z","Er","Ez","H", TWACC,0, TW2Phase,       2*pi*freq) ;
+map25D_TM("wcs","z",TW2z,"GPTData/TW-SIN.gdf", "R","Z","Er","Ez","H", TWACC,0, TW2Phase-0.5*pi,2*pi*freq) ;
+#TW3
+map25D_TM("wcs","z",TW3z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW3Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW3z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW3Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW3z,"GPTData/TW-COS.gdf", "R","Z","Er","Ez","H", TWACC,0, TW3Phase,       2*pi*freq) ;
+map25D_TM("wcs","z",TW3z,"GPTData/TW-SIN.gdf", "R","Z","Er","Ez","H", TWACC,0, TW3Phase-0.5*pi,2*pi*freq) ;
+#TW4
+map25D_TM("wcs","z",TW4z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW4Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW4z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW4Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW4z,"GPTData/TW-COS.gdf", "R","Z","Er","Ez","H", TWACC,0, TW4Phase,       2*pi*freq) ;
+map25D_TM("wcs","z",TW4z,"GPTData/TW-SIN.gdf", "R","Z","Er","Ez","H", TWACC,0, TW4Phase-0.5*pi,2*pi*freq) ;
+#TW5
+map25D_TM("wcs","z",TW5z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW5Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW5z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW5Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW5z,"GPTData/TW-COS.gdf", "R","Z","Er","Ez","H", TWACC,0, TW5Phase,       2*pi*freq) ;
+map25D_TM("wcs","z",TW5z,"GPTData/TW-SIN.gdf", "R","Z","Er","Ez","H", TWACC,0, TW5Phase-0.5*pi,2*pi*freq) ;
+#TW6
+map25D_TM("wcs","z",TW6z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW6Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW6z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW6Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW6z,"GPTData/TW-COS.gdf", "R","Z","Er","Ez","H", TWACC,0, TW6Phase,       2*pi*freq) ;
+map25D_TM("wcs","z",TW6z,"GPTData/TW-SIN.gdf", "R","Z","Er","Ez","H", TWACC,0, TW6Phase-0.5*pi,2*pi*freq) ;
+#Output Coupler
+map25D_TM("wcs","z",TW7z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", TWACC,0, TW7Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",TW7z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", TWACC,0, TW7Phase-0.5*pi,2*pi*freq) ;
+map25D_TM("wcs","z",TW7z,"GPTData/COUPLEREXIT.gdf","R","Z","Er","Ez","H", TWACC*TWMapEmax/OCMapEmax,0, TW7Phase,2*pi*freq) ;
+
+
+# first linac.
+# about 1.5 m. 39 TW cells + 2 couplers
+TWMapL2=.01750;
+
+L1CL=2*TWMapL2;	# cell length in the first linac.
+
+L1C0z=1.0175;	# position of the center of the first cell in the first linac.
+
+L1C1z=L1C0z+L1CL;
+
+L1C40z=L1C0z+40*L1CL;
+
+L1ACC=15.034;	# peak Accelerating gradient in the first linac in [MV/m].
+
+TWCAPEMAX=3.746914;
+
+
+
+L1C0Phase = L1PHASE * deg2rad;
+
+L1C1Phase=L1C0Phase-2/3*pi;
+L1C2Phase=L1C0Phase-4/3*pi;
+L1C3Phase=L1C0Phase;
+
+L1C4Phase=L1C0Phase-2/3*pi;
+L1C40Phase=L1C0Phase-2/3*pi;
+
+#midsolenoid
+#bzsolenoid("wcs","z",2.5,0.04,0.5,100000);
+#bzsolenoid("wcs","z",2.5+0.5,0.04,0.5,-100000);
+
+#quadrupole("wcs","z",2.5,0.1,8);
+
+# 1.5 m linac.
+# L1C0 (Input Coupler)
+map25D_TM("wcs","z",L1C0z,"GPTData/TW-CAP2.gdf","R","Z","Er","Ez","H", L1ACC*TWMapEmax/TWCAPEMAX,0, L1C0Phase,2*pi*freq) ;
+map25D_TM("wcs","z",L1C0z,"GPTData/TW-COS.gdf","R","Z","Er","Ez","H", L1ACC,0, L1C0Phase,    2*pi*freq) ;
+map25D_TM("wcs","z",L1C0z,"GPTData/TW-SIN.gdf","R","Z","Er","Ez","H", L1ACC,0, L1C0Phase-0.5*pi,    2*pi*freq) ;
+# L1C1
+
+map25D_TM("wcs","z",L1C1z,"GPTData/lin1-cos.gdf","R","Z","Er","Ez","H", L1ACC,0, L1C1Phase,    2*pi*freq) ;
+map25D_TM("wcs","z",L1C1z,"GPTData/lin1-sin.gdf","R","Z","Er","Ez","H", L1ACC,0, L1C1Phase-0.5*pi,    2*pi*freq) ;
+
+# L1C40 (Output Coupler)
+map25D_TM("wcs","z",L1C40z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", L1ACC,0, L1C40Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",L1C40z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", L1ACC,0, L1C40Phase-0.5*pi,    2*pi*freq) ;
+map25D_TM("wcs","z",L1C40z,"GPTData/TW-CAP.gdf","R","Z","Er","Ez","H", L1ACC*TWMapEmax/TWCAPEMAX,0, L1C40Phase,2*pi*freq) ;
+
+# 3-m linac
+
+L2z = 2.8; # Linac position in [m]. (the center of the first cell)
+L2ACC =16.046; # Accelerating Gradient in [MV/m].
+
+
+L2C0z = L2z;
+L2C1z = L2C0z + 2*TWMapL;
+L2C82z = L2C0z +82* 2*TWMapL;
+
+L2C0Phase = L2Phase * 180/pi;
+L2C1Phase = L2C0Phase - 2/3 * pi;
+L2C2Phase = L2C0Phase - 4/3 * pi;
+L2C3Phase = L2C0Phase;
+L2C82Phase = L2C0Phase - 2/3 * pi;
+
+# L2C0 (Input Coupler)
+map25D_TM("wcs","z",L2C0z,"GPTData/TW-CAP2.gdf","R","Z","Er","Ez","H", L2ACC*TWMapEmax/TWCAPEMAX,0, L2C0Phase,2*pi*freq) ;
+map25D_TM("wcs","z",L2C0z,"GPTData/TW-COS.gdf","R","Z","Er","Ez","H", L2ACC,0, L2C0Phase,    2*pi*freq) ;
+map25D_TM("wcs","z",L2C0z,"GPTData/TW-SIN.gdf","R","Z","Er","Ez","H", L2ACC,0, L2C0Phase-0.5*pi,    2*pi*freq) ;
+# L2C1
+map25D_TM("wcs","z",L2C1z,"GPTData/lin2-cos.gdf","R","Z","Er","Ez","H", L2ACC,0, L2C1Phase,    2*pi*freq) ;
+map25D_TM("wcs","z",L2C1z,"GPTData/lin2-sin.gdf","R","Z","Er","Ez","H", L2ACC,0, L2C1Phase-0.5*pi,    2*pi*freq) ;
+# L2C82 (Output Coupler)
+map25D_TM("wcs","z",L2C82z,"GPTData/TW-COS2.gdf","R","Z","Er","Ez","H", L2ACC,0, L2C82Phase+pi,    2*pi*freq) ;
+map25D_TM("wcs","z",L2C82z,"GPTData/TW-SIN2.gdf","R","Z","Er","Ez","H", L2ACC,0, L2C82Phase-0.5*pi,    2*pi*freq) ;
+map25D_TM("wcs","z",L2C82z,"GPTData/TW-CAP.gdf","R","Z","Er","Ez","H", L2ACC*TWMapEmax/TWCAPEMAX,0, L2C82Phase,2*pi*freq) ;
+
+
+snapshot(0, 3e-8, 1e-9);
+
+
+screen("wcs", "I", 6);
