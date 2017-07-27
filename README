@@ -1,0 +1,118 @@
+--------------------------------------------------------------------------------
+fullbeamline: A UCLA custom extension to Bmad that allows GPT to be used at the
+start of the lattice to simulate low energy space charge.
+--------------------------------------------------------------------------------
+
+
+If/When this code breaks, or if you have any questions, send me an email at
+jasperhansel@gmail.com
+
+
+--------------------------------------------------------------------------------
+Overview
+--------------------------------------------------------------------------------
+
+
+The basic idea of this code is that a custom element is added at the start of
+the Bmad lattice which represents the part of the lattice that will be tracked
+with GPT. This element has attributes corresponding to parameters of the GPT
+simulation. When Bmad tracks a beam through the element, custom code writes the
+names and current values of the attributes to a temporary file, and then calls
+a python script which reads and deletes this file. GPT is then called with these
+attributes defined as GPT variables, and the beam is tracked to a GPT screen
+element. Finally, the Beam is read back into Bmad, and is tracked down the
+lattice. Note that these attributes can be optimized in the Tao optimizer just
+like any other Bmad attributes.
+
+There are a few restrictions/rules that exist for Bmad/Tao programs:
+
+1) Only one custom lattice element should be defined per lattice file and it
+should be the first element of the beamline
+
+2) The lattice must be linear.
+
+3) Only beams should be tracked. You should set global%track_type to "beam" in
+the &tao_params namelist and all data should have "beam" as the data source.
+
+4) Only track electrons.
+
+5) The custom element should have 'l=0'.
+
+6) No more than five custom attributes can be defined for custom elements. If an
+attribute is not intended to be optimized by the tao optimizer, it should be a
+variable in the GPT lattice file.
+
+7) Radiation integrals may not be accurate. If you need data from radiation
+integrals, contact me as it may be possible to make some modifications to get
+them to work.
+
+8) All custom attributes must be real numbers.
+
+9) The GPT Inputfile must have one (and only one) screen element at the very end
+of the lattice.
+
+10) It is not possible to use the tao optimizer to optimize a lattice based on
+data from before the end of the GPT lattice.
+
+Finally, there are a few general things to note about this code:
+
+1) The customized version of Bmad/Tao acts the same as the regular version of
+Bmad/Tao if there are no custom lattice elements.
+
+2) After reading the beam from GPT into Bmad, the charge of each particle is the
+total charge of the bunch in GPT divided by the number of particles.
+
+3) Don't rule out the possibility that there are subtle numerical errors when
+the beam is read from GPT into Bmad.
+
+--------------------------------------------------------------------------------
+Using full-beamline
+--------------------------------------------------------------------------------
+
+Each full beamline simulation needs a Bmad lattice file. The lattice file should
+include the line 'parameter[geometry] = open' to specify the lattice is linear.
+The syntax of the custom element representing the gpt simulation is as follows:
+
+parameter[custom_attribute1] = "SOMENAME"
+parameter[custom_attribute2] = "SOMEOTHERNAME"
+name_of_gpt_section: custom, l=0, SOMENAME = 1.234e5, SOMEOTHERNAME=67.890
+
+More custom attributes can be added, however the maximum is five (there is no
+custom_attribute6 in Bmad). 'l' must be defined and must equal 0. Remember when
+processing data obtained from Bmad/Tao that 's=0' in bmad corresponds to the end
+of the GPT lattice. The names of custom attributes should be in all caps and
+have no underscores.
+
+Each full beamline simulation also needs a GPT lattice file. This file must be
+named 'input.in' and must contain a screen. When the GPT lattice file is run by
+the customized Bmad code, it will create an output file called 'output.gdf'
+
+Although it is technically possible to run a full beamline simulation without
+Tao, it is easier just to use Tao. When using Tao, make sure to set
+'global%track_type = "beam"' in the &tao_params namelist. You will need a
+&tao_beam_init namelist or else Tao will give an error, but since the beam is
+read from GPT, the actual values in this namelist are irrelevant. For speed you
+can set 'beam_init%n_particles' to some low number. Although Tao has built in
+plotting functionality, it is easiest to simply write the Bmad/Tao data to one
+file and the GPT data to another and then combine and plot them in python using
+matplotlib as Tao does not have access to data from before the end of the GPT
+lattice.
+
+Included is a program called 'fullbeamline'. Run 'fullbeamline --help' to see
+what it can do.
+
+--------------------------------------------------------------------------------
+Troubleshooting
+--------------------------------------------------------------------------------
+
+Problem:
+  Bmad/Tao gives a segmentation fault.
+
+Solution:
+  Segmentation faults are not uncommon in Bmad/Tao. One common cause is a syntax
+  error in some sort of input file such as a lattice file or tao initialization
+  file. Another common cause is forgetting to set a value (such as a lattice
+  element attribute or a variable in a tao namelist) that must be set. If you
+  still are unable to locate the problem, build Bmad in debug mode with
+  'full-beamline --build debug', make sure you have valgrind installed, and then
+  run the command 'full-beamline --valgrind' which invokes Tao with valgrind.

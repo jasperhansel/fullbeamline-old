@@ -1,0 +1,4 @@
+show -write __bmad_data curve -line r.sigma.sigmax
+exit
+end_file
+rm *.digested* __bmad_data output.gdf

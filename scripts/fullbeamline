@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+
+
+import fullbeamline
+import sys
+
+
+help_message = \
+"""fullbeamline --help
+    prints this help message
+
+fullbeamline --update
+    downloads the latest version of bmad from Cornell's website
+
+fullbeamline --clean
+    deletes all compiled files
+
+fullbeamline --build production
+fullbeamline --build debug
+    compiles bmad
+
+fullbeamline --check
+    checks the current installation
+"""
+
+
+error = lambda message: print('\033[1mfullbeamline:\033[0m \033[31merror:\033[0m', message)
+
+
+def main():
+    if (len(sys.argv) < 2):
+        error('no command specified')
+        return
+    command = sys.argv[1]
+    if command == '--help':
+        print(help_message)
+    elif command == '--callgpt':
+        fullbeamline.callgpt()
+    elif command == '--update':
+        fullbeamline.update()
+    elif command == '--clean':
+        fullbeamline.clean()
+    elif command == '--check':
+        print('\033[32mok\033[0m')
+    elif command == '--build':
+        if len(sys.argv) > 2 and sys.argv[2] == 'debug':
+            fullbeamline.build('debug')
+        elif len(sys.argv) > 2 and sys.argv[2] == 'production':
+            fullbeamline.build('production')
+        else:
+            error('must specify \'debug\' or \'production\' after --build')
+    else:
+        error('command "{}" not recognized'.format(command))
+
+
+if __name__ == '__main__':
+    main()

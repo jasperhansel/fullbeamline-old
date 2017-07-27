@@ -1,0 +1,28 @@
+! the following beginning parameters don't actually matter as the twiss
+! parameters are for single particle tracking and the reference momentum p0c is
+! changed during the simulation to the average momentum of the bunch
+beginning[p0c] = 6.1312176e7
+beginning[alpha_a] = -1.0517205
+beginning[alpha_b] = -1.04093224
+beginning[beta_a] = 3.21453179
+beginning[beta_b] = 3.23562893
+
+
+parameter[particle] = electron
+parameter[geometry] = open
+
+
+parameter[custom_attribute1] = "L1PHASE"
+parameter[custom_attribute2] = "L2PHASE"
+gpt: custom, l = 0, L1PHASE = 220.0, L2PHASE = 130.0
+
+
+q1: quad, l = 0.1, k1 = 10
+d1: drift, l = 0.1
+q2: quad, l = 0.1, k1 = -10
+
+
+beamline: line = (gpt, q1, d1, q2)
+
+
+use, beamline
