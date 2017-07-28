@@ -1,6 +1,8 @@
 import math
 import subprocess
 import os
+import sys
+import pickle
 
 
 c = 299792458    # Speed of Light [m/s]
@@ -72,9 +74,18 @@ def convert_data(reference_time, reference_momentum, number_of_particles, total_
 
 
 def callgpt():
-    print('--> calling gpt: ', end='')
     parameters = read_parameters()
+    if os.path.isfile('__fullbeamline_cache') and os.path.isfile('__particles'):
+        with open('__fullbeamline_cache', 'rb') as f:
+            old_parameters = pickle.load(f)
+        if (parameters == old_parameters):
+            print('--> using cached GPT data')
+            return
+    print('--> calling gpt: ', end='')
+    sys.stdout.flush()
     run_gpt(parameters)
     reference_time, reference_momentum, number_of_particles, total_charge = compute_statistics()
     convert_data(reference_time, reference_momentum, number_of_particles, total_charge)
+    with open('__fullbeamline_cache', 'wb+') as f:
+        pickle.dump(parameters, f)
     print('\033[32mok\033[0m')

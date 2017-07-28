@@ -5,6 +5,9 @@
 
 &tao_params
   global%track_type = "beam"
+  bmad_com%coherent_synch_rad_on = T
+  csr_param%ds_track_step = 0.1
+  csr_param%n_bin = 100
 /
 
 
@@ -99,17 +102,19 @@
   plot_page%text_height = 12
   region(1) = "rA" 0.0, 1.0, 0.0, 0.5
   region(2) = "rB" 0.0, 1.0, 0.5, 1.0
-  place(1) = "rA", "pspace"
-  place(2) = "rB", "blah"
+  place(1) = "rA", "phase_space"
+  place(2) = "rB", "norm_emittance"
 /
 
 
 &tao_template_plot
-  plot%name = "pspace"
-  plot%x%min = -2e-4
-  plot%x%max = 2e-4
+  plot%name = "phase_space"
+  !plot%x%min = -2e-4
+  !plot%x%max = 2e-4
   plot%x%major_div_nominal = 4
   plot%x%label = "z"
+  plot%autoscale_x = T
+  plot%autoscale_y = T
   plot%n_graph = 1
 /
 
@@ -120,19 +125,19 @@
   graph%box = 1, 1, 1, 1
   graph%margin = 0.12, 0.12, 0.12, 0.12, "%BOX"
   graph%y%label = "Pz"
-  graph%y%max = 0.003
-  graph%y%min = -0.003
+  !graph%y%max = 0.007
+  !graph%y%min = -0.007
   graph%y%major_div_nominal = 4
   graph%n_curve = 1
   curve(1)%data_type_x = "z"
   curve(1)%data_type = "pz"
   curve(1)%data_source = "beam"
-  curve(1)%ele_ref_name = "gpt"
+  curve(1)%ele_ref_name = "GPT"
 /
 
 
 &tao_template_plot
-  plot%name = "blah"
+  plot%name = "norm_emittance"
   plot%x%min = 0
   plot%x%max = 1
   plot%x%major_div_nominal = 10
@@ -144,16 +149,19 @@
 
 &tao_template_graph
   graph_index = 1
-  graph%name = "chirp"
-  !graph%type = "data"
+  graph%name = "ab"
+  graph%type = "data"
   graph%box = 1, 1, 1, 1
-  graph%title = "chirp"
+  graph%title = "Normalized Emittance"
   graph%margin = 60, 200, 30, 30, "POINTS"
-  graph%y%label = "dPz/dz"
-  graph%y%min = -30
-  graph%y%max = 30
-  graph%n_curve = 1
-  curve(1)%name = "chirp"
+  graph%y%label = "Normalized Emittance [m*rad]"
+  graph%y%min = 0
+  graph%y%max = 15e-7
+  graph%n_curve = 2 ! graph%n_curve = 1
+  curve(1)%name = "a_emit"
   curve(1)%data_source = "beam"
-  curve(1)%data_type = "dpz_dz"
+  curve(1)%data_type = "norm_emit.a"
+  curve(2)%name = "b_emit"
+  curve(2)%data_source = "beam"
+  curve(2)%data_type = "norm_emit.b"
 /

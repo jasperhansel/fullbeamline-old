@@ -171,8 +171,8 @@ do i = 1, n_particles
 
 end do
 
-! close and delete particles file
-close (unit = fileno, iostat = ios, status = 'delete')
+! close particles file
+close (unit = fileno, iostat = ios)
 if (ios /= 0) then
   print *, 'UCLA Bmad Error: Unable to delete particles file'
   stop 'error'

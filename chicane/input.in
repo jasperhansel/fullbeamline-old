@@ -3,7 +3,6 @@ G01=6.1;
 G02=54;
 L2Phase = L2PHASE; # Linac Phase in [deg].
 #nps = 1001;#50000 ;   # Number of macro particles
-N=100;
 
 Qtot = -20e-12 ; # Total charge
 
@@ -19,7 +18,7 @@ height = Nslits*d;
 
 
 
-radius = 0.56e-3; # Beam radius
+radius = BEAMRADIUS; #0.56e-3; # Beam radius
 trms =1.02e-12 ;   # Laser pulse length
 
 Eo = 0.4 ;           # Start with 0.4 eV
@@ -53,7 +52,7 @@ TW6z=TW5z+2*TWMapL;
 TW7z=TW6z+2*TWMapL;
 
 deg2rad = pi/180;
-phiSW0 = 39.5*deg2rad;                     # Beam launch phase, sin(wt+phiSW0).
+phiSW0 = LAUNCHPHASE * deg2rad; #39.5*deg2rad;                     # Beam launch phase, sin(wt+phiSW0).
 phiSW = phiSW0 + (-90 + 180) * deg2rad;  # Adjst the map phase. -90:cos->sin, 180:+->-
 
 TWPhaseOffset = 0 * deg2rad; # Deviation from the normal phase. This can be achieved by changing the cavity temperature.
