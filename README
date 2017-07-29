@@ -65,9 +65,11 @@ total charge of the bunch in GPT divided by the number of particles.
 3) Don't rule out the possibility that there are subtle numerical errors when
 the beam is read from GPT into Bmad.
 
+
 --------------------------------------------------------------------------------
 Using full-beamline
 --------------------------------------------------------------------------------
+
 
 Each full beamline simulation needs a Bmad lattice file. The lattice file should
 include the line 'parameter[geometry] = open' to specify the lattice is linear.
@@ -101,9 +103,29 @@ lattice.
 Included is a program called 'fullbeamline'. Run 'fullbeamline --help' to see
 what it can do.
 
+
+--------------------------------------------------------------------------------
+Running the Examples
+--------------------------------------------------------------------------------
+
+
+The example in the 'example' folder can be run with the shell script
+'simulate.sh' which runs the simulation and produces a plot of the bunch size in
+the x direction vs position down the beamline. The red part of the simulation is
+done in GPT and the blue part in Bmad.
+
+The example in the 'chicane' folder can be run with the command 'tao'. Ignore
+the plotting window that first pops up (as it computes data from the single
+particle tracking). Try the tao commands 'call twiss', 'call bunch_size', or
+'call phase_space X' where X is either a lattice element (e.g. 'gpt' or 'dp1')
+or a lattice element index (e.g. '1' or '10'). To turn off the csr calculation,
+run the command 'set bmad_com coherent_synch_rad_on = F'.
+
+
 --------------------------------------------------------------------------------
 Troubleshooting
 --------------------------------------------------------------------------------
+
 
 Problem:
   Bmad/Tao gives a segmentation fault.
@@ -114,5 +136,4 @@ Solution:
   file. Another common cause is forgetting to set a value (such as a lattice
   element attribute or a variable in a tao namelist) that must be set. If you
   still are unable to locate the problem, build Bmad in debug mode with
-  'full-beamline --build debug', make sure you have valgrind installed, and then
-  run the command 'full-beamline --valgrind' which invokes Tao with valgrind.
+  'fullbeamline --build debug' and run Tao with valgrind.

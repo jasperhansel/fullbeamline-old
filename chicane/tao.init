@@ -95,73 +95,97 @@
 /
 
 
-&tao_plot_page
-  plot_page%plot_display_type = 'X'
-  plot_page%size = 1000, 750
-  plot_page%border = 50, 50, 50, 50, 'POINTS'
-  plot_page%text_height = 12
-  region(1) = "rA" 0.0, 1.0, 0.0, 0.5
-  region(2) = "rB" 0.0, 1.0, 0.5, 1.0
-  place(1) = "rA", "phase_space"
-  place(2) = "rB", "norm_emittance"
-/
-
-
-&tao_template_plot
-  plot%name = "phase_space"
-  !plot%x%min = -2e-4
-  !plot%x%max = 2e-4
-  plot%x%major_div_nominal = 4
-  plot%x%label = "z"
-  plot%autoscale_x = T
-  plot%autoscale_y = T
-  plot%n_graph = 1
-/
-
-&tao_template_graph
-  graph_index = 1
-  graph%name = "z"
-  graph%type = "phase_space"
-  graph%box = 1, 1, 1, 1
-  graph%margin = 0.12, 0.12, 0.12, 0.12, "%BOX"
-  graph%y%label = "Pz"
-  !graph%y%max = 0.007
-  !graph%y%min = -0.007
-  graph%y%major_div_nominal = 4
-  graph%n_curve = 1
-  curve(1)%data_type_x = "z"
-  curve(1)%data_type = "pz"
-  curve(1)%data_source = "beam"
-  curve(1)%ele_ref_name = "GPT"
-/
-
-
 &tao_template_plot
   plot%name = "norm_emittance"
   plot%x%min = 0
-  plot%x%max = 1
   plot%x%major_div_nominal = 10
-  plot%x%label = "s"
   plot%x_axis_type = "s"
+  plot%x%label = "s [m]"
   plot%n_graph = 1
 /
 
 
 &tao_template_graph
   graph_index = 1
-  graph%name = "ab"
+  graph%name = "g"
   graph%type = "data"
   graph%box = 1, 1, 1, 1
   graph%title = "Normalized Emittance"
-  graph%margin = 60, 200, 30, 30, "POINTS"
+  graph%margin = 0.15, 0.06, 0.12, 0.12, "%BOX"
   graph%y%label = "Normalized Emittance [m*rad]"
+  graph%y%max = 1e-6
   graph%y%min = 0
-  graph%y%max = 15e-7
-  graph%n_curve = 2 ! graph%n_curve = 1
-  curve(1)%name = "a_emit"
+  graph%n_curve = 2
+  curve(1)%name = "a"
   curve(1)%data_source = "beam"
   curve(1)%data_type = "norm_emit.a"
-  curve(2)%name = "b_emit"
+  curve(2)%name = "b"
   curve(2)%data_source = "beam"
   curve(2)%data_type = "norm_emit.b"
+/
+
+
+&tao_template_plot
+  plot%name = "bunch_size"
+  plot%x%min = 0
+  plot%x%major_div_nominal = 10
+  plot%x_axis_type = "s"
+  plot%x%label = "s [m]"
+  plot%n_graph = 1
+/
+
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "g"
+  graph%type = "data"
+  graph%box = 1, 1, 1, 1
+  graph%title = "Bunch Size"
+  graph%margin = 0.15, 0.06, 0.12, 0.12, "%BOX"
+  graph%y%label = "Sigma [m]"
+  graph%y%max = 0.5e-3
+  graph%y%min = 0
+  graph%n_curve = 3
+  curve(1)%name = "x"
+  curve(1)%data_source = "beam"
+  curve(1)%data_type = "sigma.x"
+  curve(2)%name = "y"
+  curve(2)%data_source = "beam"
+  curve(2)%data_type = "sigma.y"
+  curve(3)%name = "z"
+  curve(3)%data_source = "beam"
+  curve(3)%data_type = "sigma.z"
+/
+
+
+&tao_template_plot
+  plot%name = "psigma"
+  plot%x%min = 0
+  plot%x%major_div_nominal = 10
+  plot%x_axis_type = "s"
+  plot%x%label = "s [m]"
+  plot%n_graph = 1
+/
+
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "g"
+  graph%type = "data"
+  graph%box = 1, 1, 1, 1
+  graph%title = "Sigma Momentum"
+  graph%margin = 0.15, 0.06, 0.12, 0.12, "%BOX"
+  graph%y%label = "Sigma [?]"
+  graph%y%max = 2e-3
+  graph%y%min = 0
+  graph%n_curve = 3
+  curve(1)%name = "x"
+  curve(1)%data_source = "beam"
+  curve(1)%data_type = "sigma.px"
+  curve(2)%name = "y"
+  curve(2)%data_source = "beam"
+  curve(2)%data_type = "sigma.py"
+  curve(3)%name = "z"
+  curve(3)%data_source = "beam"
+  curve(3)%data_type = "sigma.pz"
 /

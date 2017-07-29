@@ -1,7 +1,7 @@
 ! the following beginning parameters don't actually matter as the twiss
 ! parameters are for single particle tracking and the reference momentum p0c is
 ! changed during the simulation to the average momentum of the bunch
-beginning[p0c] = 10 !6.0025923e7
+beginning[p0c] = 6.0025923e7
 beginning[alpha_a] = -1.74323957
 beginning[alpha_b] = -1.7375917
 beginning[beta_a] = 3.63568523
@@ -31,12 +31,8 @@ dr3: drift, l = 0.1, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie
 chicane: line = (dp1, dr2, dp2, dr3, dp2, dr2, dp1)
 chicane_lord: group = {dp1[G]: G2, dp2[G]: -G2}, var = {G2}, G2=3.8
 
+!deflector: lcavity, l = 0.5, rf_frequency = 500e6, voltage = 20e6
+
 beamline: line = (gpt, drbc, chicane, drac)
 
-
 use, beamline
-
-! set ele chicane_lord G2 = ...
-! set curve
-! set ele chicane_lord G2 = 3.8
-! set curve pspace.z.c1 ele_ref_name = drac
