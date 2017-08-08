@@ -2,4 +2,3 @@ set data constraints.dipolefieldstrength[1]|meas = 0.3
 set data constraints.dipolefieldstrength[2]|meas = 0.3
 set data constraints.dipolefieldstrength[3]|meas = 0.3
 set data constraints.dipolefieldstrength[4]|meas = 0.3
-run

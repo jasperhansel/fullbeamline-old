@@ -36,7 +36,7 @@ type (coord_struct), optional :: centroid(0:)
 integer, optional :: direction
 logical err, finished
 
-integer :: fileno, ios, n_particles, i
+integer :: fileno, ios, n_particles, i, j, error_indicator
 real(rp) :: q_total, p_reference, e_reference, q_particle, vec(6), t
 
 ! do nothing if the element is not a custom element
@@ -113,6 +113,26 @@ if (ios /= 0) then
   print *, 'UCLA Bmad Error: Failed to open particles file'
   stop 'error'
 endif
+
+! read error indicator from particle file
+read (unit = fileno, fmt = *, iostat = ios) error_indicator
+if (ios /= 0) then
+  print *, 'UCLA Bmad Error: Error while reading particles file'
+  stop 'error'
+endif
+
+! check error indicator
+if (error_indicator == 1) then
+  do i = 1, size(beam_end%bunch)
+    do j = 1, size(beam_end%bunch(i)%particle)
+      beam_end%bunch(i)%particle(j)%vec(1) = 999999999.0
+    end do
+  end do
+  finished = .true.
+  err = .true.
+  return
+endif
+
 
 ! read number of particles, total charge, and reference momentum from start of
 ! particles file

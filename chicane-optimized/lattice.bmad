@@ -17,7 +17,7 @@ parameter[custom_attribute2] = "L2PHASE"
 parameter[custom_attribute3] = "LAUNCHPHASE"
 parameter[custom_attribute4] = "BEAMRADIUS"
 parameter[custom_attribute5] = "N"
-gpt: custom, l = 0, L1PHASE = 220.0, L2PHASE = 130.0, LAUNCHPHASE = 60, BEAMRADIUS = 0.56e-3, N = 1000
+gpt: custom, l = 0, L1PHASE = 220.0, L2PHASE = 130.0, LAUNCHPHASE = 35, BEAMRADIUS = 0.56e-3, N = 1000
 
 
 dr1: drift, l = 0.1, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
