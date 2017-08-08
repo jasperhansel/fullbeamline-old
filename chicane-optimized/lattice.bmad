@@ -1,0 +1,45 @@
+! the following beginning parameters don't actually matter as the twiss
+! parameters are for single particle tracking and the reference momentum p0c is
+! changed during the simulation to the average momentum of the bunch
+beginning[p0c] = 1
+beginning[alpha_a] = 0
+beginning[alpha_b] = 0
+beginning[beta_a] = 1
+beginning[beta_b] = 1
+
+
+parameter[particle] = electron
+parameter[geometry] = open
+
+
+parameter[custom_attribute1] = "L1PHASE"
+parameter[custom_attribute2] = "L2PHASE"
+parameter[custom_attribute3] = "LAUNCHPHASE"
+parameter[custom_attribute4] = "BEAMRADIUS"
+parameter[custom_attribute5] = "N"
+gpt: custom, l = 0, L1PHASE = 220.0, L2PHASE = 130.0, LAUNCHPHASE = 60, BEAMRADIUS = 0.56e-3, N = 1000
+
+
+dr1: drift, l = 0.1, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
+
+
+chdp1: sbend, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
+chdp2: sbend, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
+chdr1: drift, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
+chdr2: drift, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
+chicane: line = (chdp1, chdr1, chdp2, chdr2, chdp2, chdr1, chdp1)
+chicane_lord: overlay = {chdp1[G]: G, chdp1[l]: LMAG, chdp2[G]: -G, chdp2[l]: LMAG, &
+  chdr1[l]: LDIAG, chdr2[l]: LPARALLEL}, var = {G, LMAG, LDIAG, LPARALLEL}, G=1.3272, &
+  LMAG=0.17359, LDIAG=0.016, LPARALLEL=0.1
+
+
+chicane_end: marker
+
+
+dr2: drift, l = 0.1, tracking_method = Symp_Lie_PTC, mat6_calc_method = Symp_Lie_PTC
+
+
+beamline: line = (gpt, dr1, chicane, chicane_end, dr2)
+
+
+use, beamline

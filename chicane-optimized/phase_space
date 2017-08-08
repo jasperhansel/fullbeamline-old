@@ -1,0 +1,13 @@
+place r13 bunch_x_px
+place r23 bunch_y_py
+place r33 bunch_z_pz
+set plot bunch_x_px autoscale_x = T
+set plot bunch_x_px autoscale_y = T
+set plot bunch_y_py autoscale_x = T
+set plot bunch_y_py autoscale_y = T
+set plot bunch_z_pz autoscale_x = T
+set plot bunch_z_pz autoscale_y = T
+set curve bunch_x_px.g.c ele_ref_name = [[1]]
+set curve bunch_y_py.g.c ele_ref_name = [[1]]
+set curve bunch_z_pz.g.c ele_ref_name = [[1]]
+end_file
