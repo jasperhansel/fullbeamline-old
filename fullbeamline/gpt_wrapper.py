@@ -3,7 +3,9 @@ import subprocess
 import os
 import sys
 import pickle
-import multiprocessing
+import threading
+import signal
+import sys
 
 
 c = 299792458    # Speed of Light [m/s]
@@ -25,21 +27,70 @@ def read_parameters():
 
 
 def run_gpt(parameters):
-    gpt_command = 'gpt -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
+    if os.environ['FULLBEAMLINE_GPT_VERBOSE'] == 'true':
+        gpt_command = 'gpt -v -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
+    else:
+        gpt_command = 'gpt -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
     for variable, value in parameters.items():
         gpt_command += ' {}={}'.format(variable, value)
-    def runcmd():
-        os.system(gpt_command)
-    p = multiprocessing.Process(target=runcmd)
-    p.start()
     max_gpt_run_time = int(os.environ['FULLBEAMLINE_GPT_TIMEOUT_CAP'])
-    p.join(max_gpt_run_time)
-    if p.is_alive():
-        print("\033[31mtimeout\033[0m")
-        p.terminate()
-        p.join()
-        return False
-    return True
+    p = subprocess.Popen(gpt_command, shell=True, preexec_fn=os.setsid)
+    try:
+        p.wait(max_gpt_run_time)
+        if p.returncode == 0:
+            return True
+    except subprocess.TimeoutExpired:
+        print('\033[31mtimeout\033[0m')
+        sys.stdout.flush()
+        os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+    return False
+
+    #if os.environ['FULLBEAMLINE_GPT_VERBOSE'] == 'true':
+    #    gpt_command = 'gpt -v -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
+    #else:
+    #    gpt_command = 'gpt -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
+    #for variable, value in parameters.items():
+    #    gpt_command += ' {}={}'.format(variable, value)
+    #def runcmd():
+    #    os.system(gpt_command)
+    #p = multiprocessing.Process(target=runcmd)
+    #p.start()
+    #max_gpt_run_time = int(os.environ['FULLBEAMLINE_GPT_TIMEOUT_CAP'])
+    #p.join(max_gpt_run_time)
+    #if p.is_alive():
+    #    print("\033[31mtimeout\033[0m")
+    #    p.terminate()
+    #    p.join()
+    #    return False
+    #return True
+
+    #os.system('rm /home/jasper/.wine/drive_c/users/jasper/input.in')
+    #system('ln input.in /home/jasper/.wine/drive_c/users/jasper/input.in')
+    #gpt_command = 'wine "$GPTEXEPATH" -o \'C:\\users\\jasper\\output.gdf\' \'C:\\users\\jasper\\input.in\''
+    #for variable, value in parameters.items():
+    #    gpt_command += ' {}={}'.format(variable, value)
+    #system(gpt_command)
+    #system('rm  /home/jasper/.wine/drive_c/users/jasper/input.in')
+    #system('mv /home/jasper/.wine/drive_c/users/jasper/output.gdf output.gdf')
+
+    #if os.environ['FULLBEAMLINE_GPT_VERBOSE'] == 'true':
+    #    gpt_command = 'gpt -v -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
+    #else:
+    #    gpt_command = 'gpt -o output.gdf input.in GPTLICENSE=$GPTLICENSE'
+    #for variable, value in parameters.items():
+    #    gpt_command += ' {}={}'.format(variable, value)
+    #def runcmd():
+    #    os.system(gpt_command)
+    #p = multiprocessing.Process(target=runcmd)
+    #p.start()
+    #max_gpt_run_time = int(os.environ['FULLBEAMLINE_GPT_TIMEOUT_CAP'])
+    #p.join(max_gpt_run_time)
+    #if p.is_alive():
+    #    print("\033[31mtimeout\033[0m")
+    #    p.terminate()
+    #    p.join()
+    #    return False
+    #return True
 
 
 def compute_statistics():
@@ -87,6 +138,9 @@ def convert_data(reference_time, reference_momentum, number_of_particles, total_
 
 def callgpt():
     parameters = read_parameters()
+    print('params:')
+    for k, v in parameters.items():
+        print('    {} = {}'.format(k, v))
     if os.path.isfile('__fullbeamline_cache') and os.path.isfile('__particles'):
         with open('__fullbeamline_cache', 'rb') as f:
             old_parameters = pickle.load(f)
@@ -95,11 +149,10 @@ def callgpt():
             return
     print('--> calling gpt: ', end='')
     sys.stdout.flush()
+    run_gpt(parameters)
     if not run_gpt(parameters):
         with open('__particles', 'w+') as f:
             f.write('1\n')
-        with open('__fullbeamline_cache', 'wb+') as f:
-            pickle.dump(parameters, f)
         return
     reference_time, reference_momentum, number_of_particles, total_charge = compute_statistics()
     convert_data(reference_time, reference_momentum, number_of_particles, total_charge)

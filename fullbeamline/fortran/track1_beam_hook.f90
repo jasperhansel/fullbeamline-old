@@ -125,11 +125,19 @@ endif
 if (error_indicator == 1) then
   do i = 1, size(beam_end%bunch)
     do j = 1, size(beam_end%bunch(i)%particle)
-      beam_end%bunch(i)%particle(j)%vec(1) = 999999999.0
+      beam_end%bunch(i)%particle(j)%vec(1) = 999999999.9
     end do
   end do
   finished = .true.
   err = .true.
+
+  ! close particles file
+  close (unit = fileno, iostat = ios)
+  if (ios /= 0) then
+    print *, 'UCLA Bmad Error: Unable to close particles file'
+    stop 'error'
+  endif
+
   return
 endif
 
@@ -194,7 +202,7 @@ end do
 ! close particles file
 close (unit = fileno, iostat = ios)
 if (ios /= 0) then
-  print *, 'UCLA Bmad Error: Unable to delete particles file'
+  print *, 'UCLA Bmad Error: Unable to close particles file'
   stop 'error'
 endif
 
