@@ -37,7 +37,7 @@ integer, optional :: direction
 logical err, finished
 
 integer :: fileno, ios, n_particles, i, j, error_indicator
-real(rp) :: q_total, p_reference, e_reference, q_particle, vec(6), t
+real(rp) :: q_total, p_reference, e_reference, q_particle, vec(6), t, avgx, avgy, avgpx, avgpy, avgpz
 
 ! do nothing if the element is not a custom element
 if (ele%key /= custom$) then
@@ -47,13 +47,14 @@ endif
 
 ! multi-bunch tracking is not supported
 if (size(beam_start%bunch) /= 1) then
-  print *, 'UCLA Bmad Error: Bunch tracking not supported'
+  print *, 'UCLA Bmad Error: Multi-bunch tracking not supported'
   stop 'error'
 endif
 
+
 ! open parameters file
 fileno = lunget()
-open (unit = fileno, file = '__parameters', iostat = ios, status = 'replace')
+open (unit = fileno, file = '__fullbeamline/parameters', iostat = ios, status = 'replace')
 if (ios /= 0) then
   print *, 'UCLA Bmad Error: Unable to create parameters file'
   stop 'error'
@@ -104,11 +105,11 @@ if (ios /= 0) then
 endif
 
 ! call python script
-call system_command('fullbeamline --callgpt')
+call system_command('fullbeamline --track')
 
 ! open particles file
 fileno = lunget()
-open (unit = fileno, file = '__particles', iostat = ios, status = 'old')
+open (unit = fileno, file = '__fullbeamline/particles', iostat = ios, status = 'old')
 if (ios /= 0) then
   print *, 'UCLA Bmad Error: Failed to open particles file'
   stop 'error'
@@ -144,8 +145,9 @@ endif
 
 ! read number of particles, total charge, and reference momentum from start of
 ! particles file
-read (unit = fileno, fmt = *, iostat = ios) q_total, p_reference, n_particles
+read (unit = fileno, fmt = *, iostat = ios) avgx, avgy, avgpx, avgpy, avgpz, q_total, p_reference, n_particles
 if (ios /= 0) then
+  print *, '1'
   print *, 'UCLA Bmad Error: Error while reading particles file'
   stop 'error'
 endif
@@ -184,6 +186,7 @@ do i = 1, n_particles
   ! read numbers from particles file
   read (unit = fileno, fmt = *, iostat = ios) vec, t
   if (ios /= 0) then
+    print *, '2'
     print *, 'UCLA Bmad Error: Error while reading particles file'
     stop 'error'
   endif
@@ -200,7 +203,7 @@ do i = 1, n_particles
 end do
 
 ! close particles file
-close (unit = fileno, iostat = ios)
+close (unit = fileno, iostat = ios, status = 'delete')
 if (ios /= 0) then
   print *, 'UCLA Bmad Error: Unable to close particles file'
   stop 'error'

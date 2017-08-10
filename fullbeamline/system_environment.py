@@ -1,12 +1,9 @@
 import os
 import sys
 import pathlib
+import pickle
 import platform
 import subprocess
-
-
-class SystemEnivronmentError(Exception):
-    pass
 
 
 class SystemEnvironment(object):
@@ -17,6 +14,28 @@ class SystemEnvironment(object):
         self.detectGPT()
         self.detectBmad()
         self.detectCURL()
+        try:
+            with open('__fullbeamline/settings', 'rb') as f:
+                self.cache_limit, self.timeout, self.is_verbose = pickle.load(f)
+        except FileNotFoundError:
+            self.cache_limit = 5
+            self.timeout = 60
+            self.is_verbose = False
+
+    def setcachelimit(self, value):
+        self.cache_limit = value
+        with open('__fullbeamline/settings', 'wb+') as f:
+            pickle.dump((self.cache_limit, self.timeout, self.is_verbose), f)
+
+    def settimeout(self, value):
+        self.timeout = value
+        with open('__fullbeamline/settings', 'wb+') as f:
+            pickle.dump((self.cache_limit, self.timeout, self.is_verbose), f)
+
+    def setverbose(self, value):
+        self.is_verbose = value
+        with open('__fullbeamline/settings', 'wb+') as f:
+            pickle.dump((self.cache_limit, self.timeout, self.is_verbose), f)
 
     def detectGPT(self):
         try:
@@ -60,20 +79,6 @@ class SystemEnvironment(object):
                   .format(DIST_BASE_DIR, self.bash_file, self.bash_file))
             self.bmad_dir = None
             self.bmad_exists = False
-
-    def ensureTaoWorks(self):
-        try:
-            subprocess.run('tao -noinit -noplot', shell=True, check=True, stderr=subprocess.PIPE)
-            return True
-        except subprocess.CalledProcessError as e:
-            print('\033[1mfullbeamline: \033[33merror: \033[0mCommand \'tao\' n'
-                  'ot working. Either you forgot to put it in your PATH, or Bma'
-                  'd is not compiled. To add Tao to your path, put the line \'e'
-                  'xport PATH="$PATH:$DIST_BASE_DIR/debug/bin:$DIST_BASE_DIR/pr'
-                  'oduction/bin"\' to your {} file. To build Bmad, run \'fullbe'
-                  'amline --build debug\' or \'fullbeamline --build production'
-                  '\''.format(self.bash_file))
-            sys.exit(1)
 
     def detectCURL(self):
         try:

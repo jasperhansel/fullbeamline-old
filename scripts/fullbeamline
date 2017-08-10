@@ -2,54 +2,115 @@
 
 
 import fullbeamline
+import os
 import sys
 
 
-help_message = \
-"""fullbeamline --help
-    prints this help message
+help_message = """usage:
 
-fullbeamline --update
-    downloads the latest version of bmad from Cornell's website
+fullbeamline
+    Launches Tao.
 
-fullbeamline --clean
-    deletes all compiled files
+fullbeamline --help
+    Prints this help message.
 
-fullbeamline --build production
-fullbeamline --build debug
-    compiles bmad
+fullbeamline --update-bmad
+    Downloads the latest version of Bmad from Cornell's website. Note that this
+    deletes the existing Bmad directory and takes a fairly long time to download.
 
-fullbeamline --check
-    checks the current installation
+fullbeamline --compile-bmad production
+fullbeamline --compile-bmad debug
+    Compiles custom Bmad.
+
+fullbeamline --clean-bmad
+    Cleans the Bmad directory of all compiled files.
+
+fullbeamline --clear-cache
+    Clears cached data.
+
+fullbeamline --set timeout N
+fullbeamline --set verbose true/false
+fullbeamline --set cachelimit N
+    Set a setting for a particular simulation.
+
+fullbeamline --track
+    Called internally by Bmad.
 """
 
 
+def error(*msg):
+    print('\033[1mfullbeamline: \033[31merror:\033[0m', *msg)
+    sys.exit(1)
+
+
 def main():
-    if (len(sys.argv) < 2):
-        print('\033[1mfullbeamline: \033[31merror: \033[0mno command specified')
-        sys.exit(1)
-    command = sys.argv[1]
-    if command == '--help':
+    if len(sys.argv) == 1:
+        if not os.path.isdir('__fullbeamline'):
+            os.mkdir('__fullbeamline')
+        os.system('tao')
+    elif sys.argv[1] == '--help':
+        if len(sys.argv) != 2:
+            error('unexpected argument after \'--help\'')
         print(help_message)
-    elif command == '--callgpt':
-        fullbeamline.callgpt()
-    elif command == '--update':
+    elif sys.argv[1] == '--update-bmad':
+        if len(sys.argv) != 2:
+            error('unexpected argument after \'--update-bmad\'')
         fullbeamline.update()
-    elif command == '--clean':
-        fullbeamline.clean()
-    elif command == '--check':
-        print('\033[32mok\033[0m')
-    elif command == '--build':
+    elif sys.argv[1] == '--compile-bmad':
         if len(sys.argv) > 2 and sys.argv[2] == 'debug':
-            fullbeamline.build('debug')
+            mode = 'debug'
         elif len(sys.argv) > 2 and sys.argv[2] == 'production':
-            fullbeamline.build('production')
+            mode = 'production'
         else:
-            print('\033[1mfullbeamline: \033[31merror: \033[0mmust specify \'de'
-                  'bug\' or \'production\' after --build')
+            error('must specify \'debug\' or \'production\' after --compile-bmad')
+        if len(sys.argv) > 3:
+            error('unexpected extra argument after --update-bmad', mode)
+        fullbeamline.build(mode)
+    elif sys.argv[1] == '--clean-bmad':
+        if len(sys.argv) != 2:
+            error('unexpected argument after \'--clean-bmad\'')
+        fullbeamline.clean()
+    elif sys.argv[1] == '--clear-cache':
+        if len(sys.argv) != 2:
+            error('unexpected argument after \'--clear-cache\'')
+        os.system('rm __fullbeamline/cache* &> /dev/null')
+    elif sys.argv[1] == '--set':
+        if len(sys.argv) > 2 and sys.argv[2] == 'cachelimit':
+            try:
+                value = int(sys.argv[3])
+            except:
+                error('must specify integer after cachelimit')
+            if len(sys.argv) != 4:
+                error('unexpected extra argument after cachelimit value')
+            fullbeamline.system_environment.setcachelimit(value)
+        elif len(sys.argv) > 2 and sys.argv[2] == 'timeout':
+            try:
+                value = int(sys.argv[3])
+            except:
+                error('must specify integer after timeout')
+            if len(sys.argv) != 4:
+                error('unexpected extra argument after timeout value')
+            fullbeamline.system_environment.settimeout(value)
+        elif len(sys.argv) > 2 and sys.argv[2] == 'verbose':
+            try:
+                if sys.argv[3] == 'true':
+                    value = True
+                else:
+                    assert sys.argv[3] == 'false'
+                    value = False
+            except:
+                error('must specify \'true\' or \'false\' after verbose')
+            if len(sys.argv) != 4:
+                error('unexpected extra argument after verbose value')
+            fullbeamline.system_environment.setverbose(value)
+        else:
+            error('must specify \'cachelimit\', \'timeout\', or \'verbose\' after --set')
+    elif sys.argv[1] == '--track':
+        if len(sys.argv) != 2:
+            error('unexpected argument after \'--track\'')
+        fullbeamline.track()
     else:
-        print('\033[1mfullbeamline: \033[31merror: \033[0mcommand \'{}\' not re'
-              'cognized'.format(command))
+        error('command', sys.argv[1], 'not recognized')
 
 
 if __name__ == '__main__':

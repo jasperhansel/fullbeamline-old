@@ -13,6 +13,10 @@ fullbeamline_dir = system_environment.fullbeamline_dir
 fortran_filenames = ('make_mat6_custom.f90', 'track1_beam_hook.f90', 'track1_custom.f90')
 
 
+def system(cmd):
+    subprocess.run(cmd, shell=True, check=True)
+
+
 def build(build_type):
     if not system_environment.bmad_exists:
         print('\033[1mfullbeamline: \033[31merror: \033[0mBmad can\'t be compil'
