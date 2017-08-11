@@ -1,0 +1,6 @@
+Since this simulation takes a long time, before running it you should set the
+timeout to a large value with the command 'fullbeamline --set timeout 1000'.
+Then run 'fullbeamline'. Within tao, try the commands 'call twiss',
+'call bunch_size', or 'call phase_space N' (N is the element name or index).
+If nothing is displayed, try restarting tao until it works (plotting in tao can
+be buggy sometimes).

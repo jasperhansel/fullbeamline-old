@@ -1,0 +1,191 @@
+&tao_design_lattice
+  design_lattice(1) = "lattice.bmad"
+/
+
+
+&tao_params
+  global%track_type = "beam"
+  bmad_com%coherent_synch_rad_on = T
+  csr_param%ds_track_step = 0.1
+  csr_param%n_bin = 100
+/
+
+
+&tao_beam_init
+ beam_init%a_emit = 0.001
+ beam_init%b_emit = 0.001
+ beam_init%n_bunch = 1
+ beam_init%n_particle = 10
+ beam_init%bunch_charge = -1.6e-16
+/
+
+
+&tao_d2_data
+  d2_data%name = "sigma"
+  n_d1_data = 3
+/
+
+
+&tao_d1_data
+  ix_d1_data = 1
+  search_for_lat_eles = "*"
+  d1_data%name = "x"
+  default_data_type = "sigma.x"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 2
+  use_same_lat_eles_as = "sigma.x"
+  d1_data%name = "y"
+  default_data_type = "sigma.y"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 3
+  use_same_lat_eles_as = "sigma.x"
+  d1_data%name = "z"
+  default_data_type = "sigma.z"
+  default_data_source = "beam"
+/
+
+
+&tao_d2_data
+  d2_data%name = "twiss"
+  n_d1_data = 4
+/
+
+
+&tao_d1_data
+  ix_d1_data = 1
+  search_for_lat_eles = "*"
+  d1_data%name = "aa"
+  default_data_type = "alpha.a"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 2
+  use_same_lat_eles_as = "twiss.aa"
+  d1_data%name = "ab"
+  default_data_type = "alpha.b"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 3
+  use_same_lat_eles_as = "twiss.aa"
+  d1_data%name = "ba"
+  default_data_type = "beta.a"
+  default_data_source = "beam"
+/
+
+
+&tao_d1_data
+  ix_d1_data = 4
+  use_same_lat_eles_as = "twiss.aa"
+  d1_data%name = "bb"
+  default_data_type = "beta.b"
+  default_data_source = "beam"
+/
+
+
+&tao_template_plot
+  plot%name = "norm_emittance"
+  plot%x%min = 0
+  plot%x%major_div_nominal = 10
+  plot%x_axis_type = "s"
+  plot%x%label = "s [m]"
+  plot%n_graph = 1
+/
+
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "g"
+  graph%type = "data"
+  graph%box = 1, 1, 1, 1
+  graph%title = "Normalized Emittance"
+  graph%margin = 0.15, 0.06, 0.12, 0.12, "%BOX"
+  graph%y%label = "Normalized Emittance [m*rad]"
+  graph%y%max = 1e-6
+  graph%y%min = 0
+  graph%n_curve = 2
+  curve(1)%name = "a"
+  curve(1)%data_source = "beam"
+  curve(1)%data_type = "norm_emit.a"
+  curve(2)%name = "b"
+  curve(2)%data_source = "beam"
+  curve(2)%data_type = "norm_emit.b"
+/
+
+
+&tao_template_plot
+  plot%name = "bunch_size"
+  plot%x%min = 0
+  plot%x%major_div_nominal = 10
+  plot%x_axis_type = "s"
+  plot%x%label = "s [m]"
+  plot%n_graph = 1
+/
+
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "g"
+  graph%type = "data"
+  graph%box = 1, 1, 1, 1
+  graph%title = "Bunch Size"
+  graph%margin = 0.15, 0.06, 0.12, 0.12, "%BOX"
+  graph%y%label = "Sigma [m]"
+  graph%y%max = 0.5e-3
+  graph%y%min = 0
+  graph%n_curve = 3
+  curve(1)%name = "x"
+  curve(1)%data_source = "beam"
+  curve(1)%data_type = "sigma.x"
+  curve(2)%name = "y"
+  curve(2)%data_source = "beam"
+  curve(2)%data_type = "sigma.y"
+  curve(3)%name = "z"
+  curve(3)%data_source = "beam"
+  curve(3)%data_type = "sigma.z"
+/
+
+
+&tao_template_plot
+  plot%name = "psigma"
+  plot%x%min = 0
+  plot%x%major_div_nominal = 10
+  plot%x_axis_type = "s"
+  plot%x%label = "s [m]"
+  plot%n_graph = 1
+/
+
+
+&tao_template_graph
+  graph_index = 1
+  graph%name = "g"
+  graph%type = "data"
+  graph%box = 1, 1, 1, 1
+  graph%title = "Sigma Momentum"
+  graph%margin = 0.15, 0.06, 0.12, 0.12, "%BOX"
+  graph%y%label = "Sigma [?]"
+  graph%y%max = 2e-3
+  graph%y%min = 0
+  graph%n_curve = 3
+  curve(1)%name = "x"
+  curve(1)%data_source = "beam"
+  curve(1)%data_type = "sigma.px"
+  curve(2)%name = "y"
+  curve(2)%data_source = "beam"
+  curve(2)%data_type = "sigma.py"
+  curve(3)%name = "z"
+  curve(3)%data_source = "beam"
+  curve(3)%data_type = "sigma.pz"
+/
