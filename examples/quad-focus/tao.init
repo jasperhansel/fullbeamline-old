@@ -1,0 +1,51 @@
+&tao_design_lattice
+  design_lattice(1) = "lattice"
+/
+
+
+&tao_params
+  global%track_type = "beam"
+/
+
+
+! Dummy Beam
+&tao_beam_init
+ beam_init%a_emit = 0.001
+ beam_init%b_emit = 0.001
+ beam_init%n_bunch = 1
+ beam_init%n_particle = 10
+ beam_init%bunch_charge = -1.6e-16
+/
+
+
+&tao_var
+  v1_var%name = "magnet_strengths"
+  ix_min_var = 0
+  ix_max_var = 1
+  var(0)%ele_name = "gpt"
+  var(0)%attribute = "Q1STR"
+  var(0)%step = 1
+  var(0)%low_lim = -10
+  var(0)%high_lim = 10
+  var(0)%good_user = T
+  var(1)%ele_name = "gpt"
+  var(1)%attribute = "Q2STR"
+  var(1)%step = 1
+  var(1)%low_lim = -10
+  var(1)%high_lim = 10
+  var(1)%good_user = T
+/
+
+
+&tao_d2_data
+  d2_data%name = "data"
+  n_d1_data = 1
+/
+
+
+&tao_d1_data
+  ix_d1_data = 1
+  d1_data%name = "bunchsize"
+  datum(1) = "sigma.x" "" "" "end" "target" 0 1000 T "beam"
+  datum(2) = "sigma.y" "" "" "end" "target" 0 1000 T "beam"
+/

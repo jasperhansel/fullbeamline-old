@@ -1,0 +1,21 @@
+! Dummy Parameters
+beginning[p0c] = 1
+beginning[alpha_a] = 0
+beginning[alpha_b] = 0
+beginning[beta_a] = 1
+beginning[beta_b] = 1
+
+
+parameter[particle] = electron
+parameter[geometry] = open
+
+
+parameter[custom_attribute1] = "Q1STR"
+parameter[custom_attribute2] = "Q2STR"
+gpt: custom, l = 0, Q1STR = 0, Q2STR = 0 !3.90, Q2STR = -3.25
+
+
+beamline: line = (gpt)
+
+
+use, beamline

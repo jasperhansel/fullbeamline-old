@@ -1,0 +1,11 @@
+gamma = 100;
+radius = 6e-3;
+
+
+setparticles("beam", 100, me, qe, -1e-9);
+setrxydist("beam", "u", radius/2, radius);
+setphidist("beam", "u", 0, 2*pi);
+setGdist("beam", "u", gamma, 0);
+quadrupole("wcs", "z", 0.2, 0.1, Q1STR);
+quadrupole("wcs", "z", 0.5, 0.2, Q2STR);
+screen("wcs", "I", 1.0);

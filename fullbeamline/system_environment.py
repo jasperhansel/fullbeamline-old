@@ -9,7 +9,7 @@ import subprocess
 class SystemEnvironment(object):
 
     def __init__(self):
-        self.bash_file = '~/.bash_profile' if platform.system == 'Darwin' else '~/.bashrc'
+        self.bash_file = '~/.bash_profile' if platform.system() == 'Darwin' else '~/.bashrc'
         self.fullbeamline_dir = pathlib.Path(__file__).resolve().parent
         self.detectGPT()
         self.detectBmad()

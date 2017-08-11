@@ -1,0 +1,6 @@
+Try 'run de' to do an blunt initial optimization. At any time you can press '.'
+to stop the optimizer. Run 'set global de_lm_step_ratio = 0.1' to decrease the
+step size, and then run 'run de' to optimize again.
+
+Note that the message 'STARTING ORBIT NOT PROPERLY INITIALIZED' can be safely
+ignored as it relates to single particle tracking.
