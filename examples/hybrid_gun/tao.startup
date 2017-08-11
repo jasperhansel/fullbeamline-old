@@ -1,0 +1,3 @@
+show -write __bmad_data curve -line r.sigma.sigmax
+exit
+end_file

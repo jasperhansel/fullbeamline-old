@@ -1,0 +1,3 @@
+'./simulate.sh' will generate and display a plot of the bunch size in the x
+direction as a function of the z position in the lattice. The red is the part of
+the simulation in GPT and the blue is the part in Bmad.
