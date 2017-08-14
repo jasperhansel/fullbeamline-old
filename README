@@ -1,11 +1,57 @@
 --------------------------------------------------------------------------------
 fullbeamline: A UCLA custom extension to Bmad that allows GPT to be used at the
-start of the lattice to simulate low energy space charge.
+start of the lattice.
 --------------------------------------------------------------------------------
 
 
 If/When this code breaks, or if you have any questions, send me an email at
 jasperhansel@gmail.com
+
+
+--------------------------------------------------------------------------------
+Installing
+--------------------------------------------------------------------------------
+
+
+Step 1: Install GPT
+
+The Linux and macOS versions of GPT are on shared in the archive
+\isos\windows\GPTv3. Make sure to set the shell variable GPTLICENSE to your GPT
+license number. Add the folder bin/ in the GPT directory to your PATH variable.
+Note that on macOS, there is another unrelated program called gpt. To make sure
+the command 'gpt' invokes General Particle Tracer, add GPT's bin/ directory to
+the start of PATH so it is searched before other directories.
+
+
+Step 2: Install Bmad
+
+Install instructions and source code can be found on the Bmad website:
+https://www.classe.cornell.edu/~dcs/bmad/
+Make sure to add the debug/bin/ and production/bin/ folders in the Bmad
+directory to your PATH variable. Go ahead and compile it.
+
+
+Step 3: Run Install Script
+
+Make sure you have python3 installed. Change to the fullbeamline directory and
+run 'sudo python3 setup.py install'. Sometimes the install script will have
+trouble installing NumPy/MatPlotLib in which case you may need to install it
+yourself.
+
+
+Step 4: Check the Installation
+
+Restart your shell or run 'source ~/.bashrc' ('source ~/.bash_profile' on mac).
+This will make sure any changes you made to your Bash init file are loaded. Then
+run the command 'fullbeamline --help'. If your system is not setup properly, it
+will give an error and tell you how to fix it.
+
+
+Step 5: Rebuild Bmad
+
+Run 'fullbeamline --compile-bmad production' or
+'fullbeamline --compile-bmad debug'. This will replace some of Bmad's source
+code with custom code and recompile.
 
 
 --------------------------------------------------------------------------------
@@ -27,12 +73,14 @@ like any other Bmad attributes.
 There are a few restrictions/rules that exist for Bmad/Tao programs:
 
 1) Only one custom lattice element should be defined per lattice file and it
-should be the first element of the beamline
+should be the first element of the beamline.
 
 2) The lattice must be linear.
 
 3) Only beams should be tracked. You should set global%track_type to "beam" in
 the &tao_params namelist and all data should have "beam" as the data source.
+Be especially careful with Bmad lcavities and rfcavities, as their phase depends
+on the 'reference time' which is determined by single particle tracking.
 
 4) Only track electrons.
 
@@ -40,7 +88,8 @@ the &tao_params namelist and all data should have "beam" as the data source.
 
 6) No more than five custom attributes can be defined for custom elements. If an
 attribute is not intended to be optimized by the tao optimizer, it should be a
-variable in the GPT lattice file.
+variable in the GPT lattice file. (If you really need more, email me as there is
+a way to change this, but I haven't implemented it yet).
 
 7) Radiation integrals may not be accurate. If you need data from radiation
 integrals, contact me as it may be possible to make some modifications to get
@@ -49,10 +98,11 @@ them to work.
 8) All custom attributes must be real numbers.
 
 9) The GPT Inputfile must have one (and only one) screen element at the very end
-of the lattice.
+of the lattice. Touts/Snapshots are fine in the GPT Inputfile.
 
 10) It is not possible to use the tao optimizer to optimize a lattice based on
-data from before the end of the GPT lattice.
+data from before the end of the GPT lattice. This is because Tao does not have
+access to data from the GPT simulation.
 
 Finally, there are a few general things to note about this code:
 
@@ -86,7 +136,7 @@ of the GPT lattice. The names of custom attributes should be in all caps and
 have no underscores.
 
 Each full beamline simulation also needs a GPT lattice file. This file must be
-named 'input.in' and must contain a screen. When the GPT lattice file is run by
+named 'input' and must contain a screen. When the GPT lattice file is run by
 the customized Bmad code, it will create an output file called 'output.gdf'
 
 Although it is technically possible to run a full beamline simulation without
@@ -100,31 +150,24 @@ file and the GPT data to another and then combine and plot them in python using
 matplotlib as Tao does not have access to data from before the end of the GPT
 lattice.
 
+
+A good piece of advice is to set the beginning reference momentum to 1, which
+causes the single particle tracking to lose the particle. This makes sure you
+aren't basing your simulation on single particle data
+
+
 Included is a program called 'fullbeamline'. Run 'fullbeamline --help' to see
 what it can do.
 
 
 --------------------------------------------------------------------------------
-Running the Examples
---------------------------------------------------------------------------------
-
-
-The example in the 'example' folder can be run with the shell script
-'simulate.sh' which runs the simulation and produces a plot of the bunch size in
-the x direction vs position down the beamline. The red part of the simulation is
-done in GPT and the blue part in Bmad.
-
-The example in the 'chicane' folder can be run with the command 'tao'. Ignore
-the plotting window that first pops up (as it computes data from the single
-particle tracking). Try the tao commands 'call twiss', 'call bunch_size', or
-'call phase_space X' where X is either a lattice element (e.g. 'gpt' or 'dp1')
-or a lattice element index (e.g. '1' or '10'). To turn off the csr calculation,
-run the command 'set bmad_com coherent_synch_rad_on = F'.
-
-
---------------------------------------------------------------------------------
 Troubleshooting
 --------------------------------------------------------------------------------
+
+Problem:
+  'UCLA Bmad error: unable to create parameters file'
+solution:
+  Run tao with the command 'fullbeamline' instead of 'tao'.
 
 
 Problem:
@@ -137,3 +180,19 @@ Solution:
   element attribute or a variable in a tao namelist) that must be set. If you
   still are unable to locate the problem, build Bmad in debug mode with
   'fullbeamline --build debug' and run Tao with valgrind.
+
+
+Problem:
+  Graph is not displaying data.
+
+Solution:
+  Make sure the graph's data source is set to "beam". If it is still not showing
+  data, try restarting tao 3-4 times. For some reason this works.
+
+
+Problem:
+  Plotting is broken/buggy on Mac.
+
+Solution:
+  There isn't really a solution to this one. Some plots are fine (e.g. Phase Space).
+  Try to live with it, or use Linux.
